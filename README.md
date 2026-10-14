@@ -18,14 +18,14 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pytest -v
 ```
 
-只运行核心冒烟用例，或生成供 CI 保存的 JUnit XML 报告：
+只运行核心冒烟用例，或同时生成供 CI 读取的 JUnit XML 与可直接打开的 HTML 报告：
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -m smoke -v
-.\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/results.xml
+.\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/results.xml --html=reports/results.html --self-contained-html
 ```
 
-`smoke` 标记在项目根目录的 `pytest.ini` 中注册。运行报告保存在 `reports/`，该目录和 `.venv/` 均由 `.gitignore` 排除。
+`smoke` 标记在项目根目录的 `pytest.ini` 中注册。运行报告保存在 `reports/`；其中 `results.html` 可以直接用浏览器打开。该目录和 `.venv/` 均由 `.gitignore` 排除。
 
 ## 2. 接口清单
 
@@ -57,7 +57,7 @@ python -m venv .venv
 
 ## 5. CI
 
-`.github/workflows/api-tests.yml` 定义了 GitHub Actions 工作流。将**这个目录作为仓库根目录**推送到 GitHub 后，推送代码、创建 Pull Request 或手动触发时会安装依赖、运行全部测试并上传 `pytest-results` 报告。工作流文件只保存在本地时不会自动执行。
+`.github/workflows/api-tests.yml` 定义了 GitHub Actions 工作流。推送代码、创建 Pull Request 或手动触发时会安装依赖、运行全部测试，并把 XML 和 HTML 文件一起上传为 `pytest-results`。在 GitHub Actions 运行页面的 Artifacts 区域可以下载报告。
 
 ## 6. 接入真实项目时改哪里
 
