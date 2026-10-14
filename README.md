@@ -55,6 +55,7 @@ python -m venv .venv
 - 库存刚好够用，以及连续下单后的库存边界；
 - 请求体不完整、为空或不是 JSON 对象时拒绝下单，库存保持不变。
 - 创建订单的响应符合 `schemas/order.json` 定义的字段、类型和取值约束；对应测试在 `tests/test_contract.py`。
+- 商品列表响应符合 `schemas/products.json` 定义的商品 ID、名称与非负库存约束。
 
 ## 5. CI
 
