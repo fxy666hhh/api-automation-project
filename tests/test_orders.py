@@ -58,6 +58,27 @@ def test_get_unknown_order(authorized_client):
 
     assert response.status_code == 404
     assert response.json()["code"] == "ORDER_NOT_FOUND"
+
+
+@pytest.mark.parametrize(
+    "token",
+    [None, "wrong-token", ""],
+    ids=["missing", "invalid", "empty"],
+)
+def test_get_existing_order_requires_valid_token(authorized_client, token):
+    created = authorized_client.create_order()
+    assert created.status_code == 201
+
+    if token is None:
+        authorized_client.session.headers.pop("Authorization", None)
+    else:
+        authorized_client.use_token(token)
+
+    response = authorized_client.get_order(created.json()["id"])
+    assert response.status_code == 401
+    assert response.json() == {"code": "UNAUTHORIZED"}
+
+
 def test_order_uses_all_stock(authorized_client):
     response = authorized_client.create_order(product_id=101, quantity=5)
 
