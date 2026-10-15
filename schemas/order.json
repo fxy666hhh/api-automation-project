@@ -7,6 +7,6 @@
     "id": {"type": "string", "minLength": 1},
     "product_id": {"type": "integer", "minimum": 1},
     "quantity": {"type": "integer", "minimum": 1},
-    "status": {"type": "string", "enum": ["created"]}
+    "status": {"type": "string", "enum": ["created", "cancelled"]}
   }
 }

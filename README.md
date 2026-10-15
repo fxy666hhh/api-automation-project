@@ -20,25 +20,28 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pytest -v
 ```
 
-只运行核心冒烟用例，或同时生成供 CI 读取的 JUnit XML 与可直接打开的 HTML 报告：
+只运行核心冒烟用例，或生成 JUnit XML、HTML 与覆盖率报告：
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -m smoke -v
-.\.venv\Scripts\python.exe -m pytest -q --junitxml=reports/results.xml --html=reports/results.html --self-contained-html
+.\.venv\Scripts\python.exe -m pytest -q --cov=demo_api --cov-branch --cov-fail-under=90 --cov-report=term-missing --cov-report=xml:reports/coverage.xml --junitxml=reports/results.xml --html=reports/results.html --self-contained-html
 ```
 
-`smoke` 标记在项目根目录的 `pytest.ini` 中注册。运行报告保存在 `reports/`；其中 `results.html` 可以直接用浏览器打开。该目录和 `.venv/` 均由 `.gitignore` 排除。
+`smoke` 标记在项目根目录的 `pytest.ini` 中注册。运行报告保存在 `reports/`；其中 `results.html` 可以直接用浏览器打开，`coverage.xml` 记录被测服务覆盖率。该目录和 `.venv/` 均由 `.gitignore` 排除。
 
 ## 2. 接口清单
 
 | 方法 | 路径 | 用途 | 关键状态码 |
 | --- | --- | --- | --- |
-| POST | `/login` | 登录，获取 token | 200、400、401 |
+| POST | `/login` | 登录，获取 token | 200、400、401、415 |
 | GET | `/products` | 查询商品和库存 | 200 |
-| POST | `/orders` | 创建订单，需 Bearer token | 201、400、401、404、409 |
+| GET | `/products/{id}` | 查询商品详情 | 200、400、404 |
+| POST | `/orders` | 创建订单，需 Bearer token | 201、400、401、404、409、415 |
+| GET | `/orders` | 查询、筛选和分页订单 | 200、400、401 |
 | GET | `/orders/{id}` | 查询订单，需 Bearer token | 200、401、404 |
+| POST | `/orders/{id}/cancel` | 取消订单并返还库存 | 200、400、401、404、409 |
 
-登录账号是 `tester`，密码是 `secret123`。这是本地练习数据。商品 101 的初始库存为 5。
+登录账号是 `tester`，密码是 `secret123`。这是本地练习数据。商品 101（测试鼠标）的初始库存为 5，商品 102（测试键盘）的初始库存为 8。
 
 ## 3. 先看这三处
 
@@ -63,10 +66,13 @@ python -m venv .venv
 - 创建订单的响应符合 `schemas/order.json` 定义的字段、类型和取值约束；对应测试在 `tests/test_contract.py`。
 - 商品列表响应符合 `schemas/products.json` 定义的商品 ID、名称与非负库存约束。
 - 错误响应符合 `schemas/error.json`，未知路径返回 JSON 格式的 404。
+- 商品详情与列表一致；两个商品的库存互不影响。
+- 订单列表支持认证、状态筛选、分页和参数校验；取消订单返还库存，重复取消不会重复返还。
+- 请求字段类型、缺失与额外字段、Content-Type 和 Authorization 格式均有边界用例。
 
 ## 5. CI
 
-`.github/workflows/api-tests.yml` 定义了 GitHub Actions 工作流。推送代码、创建 Pull Request 或手动触发时会安装依赖、运行全部测试，并把 XML 和 HTML 文件一起上传为 `pytest-results`。在 GitHub Actions 运行页面的 Artifacts 区域可以下载报告。
+`.github/workflows/api-tests.yml` 定义了 GitHub Actions 工作流。推送代码、创建 Pull Request 或手动触发时会安装依赖、运行全部测试，检查被测服务覆盖率不低于 90%，并把 JUnit XML、HTML 和覆盖率 XML 一起上传为 `pytest-results`。在 GitHub Actions 运行页面的 Artifacts 区域可以下载报告。
 
 ## 6. 接入真实项目时改哪里
 

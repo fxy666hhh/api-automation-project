@@ -11,7 +11,7 @@ from tests.api_client import APIClient
 def base_url():
     # A fresh server per test gives each case the same initial inventory.
     server = HTTPServer(("127.0.0.1", 0), make_handler())
-    thread = Thread(target=server.serve_forever, daemon=True)
+    thread = Thread(target=server.serve_forever, kwargs={"poll_interval": 0.01}, daemon=True)
     thread.start()
     try:
         yield f"http://127.0.0.1:{server.server_port}"

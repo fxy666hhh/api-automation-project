@@ -1,14 +1,6 @@
-import json
-from pathlib import Path
-
 import pytest
-from jsonschema import validate
 
-
-def assert_matches_schema(data, schema_name):
-    schema_path = Path(__file__).resolve().parents[1] / "schemas" / schema_name
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    validate(instance=data, schema=schema)
+from tests.assertions import assert_matches_schema
 
 
 def test_created_order_matches_schema(authorized_client):

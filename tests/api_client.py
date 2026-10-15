@@ -25,6 +25,9 @@ class APIClient:
     def products(self):
         return self.session.get(f"{self.base_url}/products", timeout=3)
 
+    def product(self, product_id):
+        return self.session.get(f"{self.base_url}/products/{product_id}", timeout=3)
+
     def create_order(self, product_id=101, quantity=1):
         return self.session.post(
             f"{self.base_url}/orders",
@@ -34,3 +37,9 @@ class APIClient:
 
     def get_order(self, order_id):
         return self.session.get(f"{self.base_url}/orders/{order_id}", timeout=3)
+
+    def list_orders(self, **params):
+        return self.session.get(f"{self.base_url}/orders", params=params, timeout=3)
+
+    def cancel_order(self, order_id):
+        return self.session.post(f"{self.base_url}/orders/{order_id}/cancel", timeout=3)
