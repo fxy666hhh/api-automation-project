@@ -20,6 +20,24 @@ def test_create_order_and_check_inventory(authorized_client):
     assert after == before - 2
 
 
+def test_repeated_get_order_does_not_change_inventory(authorized_client):
+    created = authorized_client.create_order(quantity=2)
+    assert created.status_code == 201
+    order = created.json()
+
+    stock_before = authorized_client.products().json()["products"][0]["stock"]
+
+    first = authorized_client.get_order(order["id"])
+    second = authorized_client.get_order(order["id"])
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json() == second.json() == order
+
+    stock_after = authorized_client.products().json()["products"][0]["stock"]
+    assert stock_after == stock_before
+
+
 def test_order_requires_login(client):
     response = client.create_order()
 
